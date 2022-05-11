@@ -5,23 +5,28 @@ require('vendor/autoload.php');
 use Vonage\Client\Credentials\Basic;
 use Vonage\Client;
 use Vonage\SMS\Message\SMS;
+use Vonage\Verify\Request;
+
 
 $basic = new Basic("411e9028","2W73DtmJqORMjOu9");
 $client = new Client($basic);
 
-//envoi message normal
-$response = $client->sms()->send(
-    new SMS("212669466359", "Sender", 'A text message sent using the Nexmo SMS API')
-);
 
-$message = $response->current();
+$request = new Request('212669466359', "Vonage");
+$response = $client->verify()->start($request);
 
-if ($message->getStatus() == 0) {
-    echo "The message was sent successfully\n";
-} else {
-    echo "The message failed with status: " . $message->getStatus() . "\n";
+echo "Started verification, `request_id` is " . $response->getRequestId();
+
+
+$result = $client->verify()->check(REQUEST_ID, CODE);
+
+var_dump($result->getResponseData());
+
+try {
+    $result = $client->verify()->cancel(REQUEST_ID);
+    var_dump($result->getResponseData());
 }
 
-
-//envoi message à deux facteur
-
+catch(Exception $e) {
+    echo 'Message: ' .$e->getMessage();
+}
